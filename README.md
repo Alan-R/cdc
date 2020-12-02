@@ -19,11 +19,17 @@ If we are able to reproduce her results, then that's how good science should be 
 If we are not able to reproduce her results, then that's _also_ how good science should be done.
 Reproducing her efforts using only open source software provides complete transparency.
 
-This project concentrates on solid, provable, factual information related to COVID-19.
+
+This project concentrates on solid, provable, factual information related to COVID-19. 
+
+**This project is just beginning**, we have not yet reproduced (or failed to reproduce) her results.
+This will likely take a few weeks.
+
+
 We believe:
  - COVID-19 is a real disease,
  - COVID-19 has killed many people in the US and across the world,
  - Every death caused by COVID-19 is someone's personal tragedy.
 
-This site is in no way a "COVID-denier" effort.
+This site is not a "COVID-denier" effort.
 Attempts to categorize it as such are libel.
