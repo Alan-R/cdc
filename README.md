@@ -1,4 +1,4 @@
-This project was created create open source software to reproduce the results of a Covid-19 study by
+This project was created to use pure open source software to reproduce the results of a Covid-19 study by
 [Dr Genevieve Briand](https://www.linkedin.com/in/genevieve-briand-6027a514) an
 [Assistant Director and Senior Lecturer](https://advanced.jhu.edu/directory/genevieve-briand/)
 at Johns Hopkins University.
