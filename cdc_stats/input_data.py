@@ -19,7 +19,7 @@
 # along with this software.
 # If not, see http://www.gnu.org/licenses/
 """
-
+This code inputs data from a CSV URL into a few suitable Python formats
 """
 from typing import List, Dict, Tuple, Callable, Union
 from collections import namedtuple
@@ -39,10 +39,16 @@ class FieldEncoder(json.JSONEncoder):
 
 class UrlCSV:
     """
-    A class to create a typeful CSV object from a single URL
+    A class to create a typeful and flexible CSV object from a single URL
     """
 
     def __init__(self, name: str, url: str):
+        """
+        Initializer for UrlCSV class
+
+        :param name: str: name of this type (as a namedtuple)
+        :param url: str: URL of where to find the CSV data
+        """
         response: requests.Response = requests.get(url=url)
         response.raise_for_status()
         csv_string: str = response.content.decode('utf-8')
@@ -62,6 +68,11 @@ class UrlCSV:
 
     @staticmethod
     def _clean_headings(headings: List[str]) -> List[str]:
+        """
+        Clean up headings - not perfect, but it works for now...
+        :param headings: List[str]: List of heading names from the CSV
+        :return: List[str]: Cleaned up names suitable for being Python names
+        """
         fields: List[str] = []
         for name in headings:
             field = name.replace('(', '_')
@@ -76,6 +87,10 @@ class UrlCSV:
         return fields
 
     def determine_types(self) -> Dict[str, Tuple[Callable, type]]:
+        """
+        Figure out what types the fields are from looking at the data
+        :return: dict: Dictionary describing the callables to do conversions and field types
+        """
         field_types: Dict[str, Tuple[Callable, type]] = {}
         detect_funcs = [
             (int, int),
@@ -113,6 +128,10 @@ class UrlCSV:
         return field_types
 
     def _make_typed_tuples(self):
+        """
+        Make the typed data tuples out of the original untyped versions
+        :return: List[Tuple]: A list of typed tuples
+        """
         result = []
         for row in self.data:
             typed_row: List[FieldTypes] = []
@@ -128,6 +147,10 @@ class UrlCSV:
         return result
 
     def _make_typed_dict(self) -> List[Dict[str, FieldTypes]]:
+        """
+        Make the typed dict version of our typed tuples
+        :return: List[Dict[str, FieldTypes]]: The list of typed dicts
+        """
         result: List[Dict[str, FieldTypes]] = []
         for row in self.typed_data:
             row_dict: Dict[str, FieldTypes] = {}
@@ -137,16 +160,13 @@ class UrlCSV:
         return result
 
 
-
-
-
-def testme():
-    our_csv = UrlCSV("cdc", "https://data.cdc.gov/api/views/muzy-jte6/rows.csv")
-    # print(csv.data)
-    print(our_csv.field_types)
-    for row in our_csv.typed_dict:
-        print(json.dumps(row, cls=FieldEncoder, indent=4))
-
-
 if __name__ == '__main__':
+    def testme():
+        our_csv = UrlCSV("cdc", "https://data.cdc.gov/api/views/muzy-jte6/rows.csv")
+        # print(csv.data)
+        print(our_csv.field_types)
+        for row in our_csv.typed_dict:
+            print(json.dumps(row, cls=FieldEncoder, indent=4))
+
+
     testme()
