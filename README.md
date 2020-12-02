@@ -26,4 +26,4 @@ We believe:
  - Every death caused by COVID-19 is someone's personal tragedy.
 
 This site is in no way a "COVID-denier" effort.
-Attempts to categorize it as such are libel, and will be treated as such.
+Attempts to categorize it as such are libel.
