@@ -37,6 +37,13 @@ class FieldEncoder(json.JSONEncoder):
         return thing
 
 
+def date_to_datetime_date(date_str: str) -> datetime.date:
+    if '/' in date_str:
+        month, date, year = date_str.split('/')
+        date_str = f"{year}-{month}-{date}"
+    return datetime.date.fromisoformat(date_str)
+
+
 class UrlCSV:
     """
     A class to create a typeful and flexible CSV object from a single URL
@@ -84,6 +91,7 @@ class UrlCSV:
             while field.endswith('_'):
                 field = field[:-1]
             fields.append(field)
+        print("FIELDS:", fields)
         return fields
 
     def determine_types(self) -> Dict[str, Tuple[Callable, type]]:
@@ -94,11 +102,10 @@ class UrlCSV:
         field_types: Dict[str, Tuple[Callable, type]] = {}
         detect_funcs = [
             (int, int),
-            (datetime.date.fromisoformat, datetime.date),
+            (date_to_datetime_date, datetime.date),
             (str, str)
         ]
         for row in self.data:
-            print(f"LOOKING AT {row}")
             for field in self.field_names:
                 value = getattr(row, field)
                 if value == '':
@@ -163,10 +170,18 @@ class UrlCSV:
 if __name__ == '__main__':
     def testme():
         our_csv = UrlCSV("cdc", "https://data.cdc.gov/api/views/muzy-jte6/rows.csv")
+        csv_fields = set(our_csv.field_names)
+        our_csv2 = UrlCSV("cdc2", "https://data.cdc.gov/api/views/3yf8-kanr/rows.csv")
+        csv2_fields = set(our_csv2.field_names)
         # print(csv.data)
         print(our_csv.field_types)
-        for row in our_csv.typed_dict:
-            print(json.dumps(row, cls=FieldEncoder, indent=4))
+        # for row in our_csv.typed_dict:
+        #     print(json.dumps(row, cls=FieldEncoder, indent=4))
+        print(our_csv2.field_types)
+        print (csv_fields - csv2_fields)
+        print (csv2_fields - csv_fields)
+
+
 
 
     testme()
