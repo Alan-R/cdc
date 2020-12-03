@@ -26,9 +26,11 @@ from collections import namedtuple
 import csv
 import datetime
 import json
+import re
 import requests
 
 FieldTypes = Union[int, str, datetime.date]
+
 
 class FieldEncoder(json.JSONEncoder):
     def default(self, thing):
@@ -81,12 +83,20 @@ class UrlCSV:
         :return: List[str]: Cleaned up names suitable for being Python names
         """
         fields: List[str] = []
+        # We're deleting these because they make life harder, and differ between years...
+        del_regex1 = re.compile(r'([A-Z][0-9][0-9]-[A-Z][0-9][0-9])')
+        del_regex2 = re.compile(r'([A-Z][0-9][0-9][0-9]?)')
+
         for name in headings:
-            field = name.replace('(', '_')
+            field = del_regex1.sub("", name)
+            field = del_regex2.sub("", field)
+            field = field.replace('(', '_')
             field = field.replace(')', '_')
             field = field.replace(',', '_')
             field = field.replace('-', '_')
             field = field.replace(' ', '_')
+            # field = field.replace('___', '_')
+            field = field.replace('___', '_')
             field = field.replace('__', '_')
             while field.endswith('_'):
                 field = field[:-1]
