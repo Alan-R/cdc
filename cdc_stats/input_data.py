@@ -95,7 +95,6 @@ class UrlCSV:
             field = field.replace(',', '_')
             field = field.replace('-', '_')
             field = field.replace(' ', '_')
-            # field = field.replace('___', '_')
             field = field.replace('___', '_')
             field = field.replace('__', '_')
             while field.endswith('_'):
