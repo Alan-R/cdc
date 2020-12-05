@@ -280,11 +280,10 @@ if __name__ == '__main__':
                 break
         typed_csv_thing = typed_dict_to_typed_csv(merged_dicts)
         j = 0
-        for row in typed_csv_thing:
-            j += 1
+        for row in typed_csv_thing[:3]:
             print(row)
-            if j > 20:
-                break
+        for row in typed_csv_thing[-3:]:
+            print(row)
         pivot_dict = pivot_typed_dict(merged_dicts)
         for key in pivot_dict.keys():
             print(f"{key}: {pivot_dict[key][:10]}...")
