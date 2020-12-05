@@ -226,6 +226,24 @@ def merge_typed_dicts(*args: UrlCSV) -> List[Dict[str, FieldTypes]]:
     return csv_result
 
 
+def typed_dict_to_typed_csv(td: List[Dict[str, FieldTypes]]) -> List[List[FieldTypes]]:
+    """
+
+    :param td:
+    :return:
+    """
+    common_keys: List[str] = list(td[0].keys())
+    result: List[List[FieldTypes]] = [common_keys]
+    for row in td:
+        row_data: List[FieldTypes] = []
+        assert len(row) == len(common_keys)
+        for field in common_keys:
+            row_data.append(row[field])
+        result.append(row_data)
+
+    return result
+
+
 if __name__ == '__main__':
     def testme():
         our_csv = UrlCSV("cdc", "https://data.cdc.gov/api/views/muzy-jte6/rows.csv")
@@ -242,5 +260,14 @@ if __name__ == '__main__':
         for row in merged_dicts:
             j += 1
             print(json.dumps(row, cls=FieldEncoder, indent=4))
+            if j > 20:
+                break
+        typed_csv_thing = typed_dict_to_typed_csv(merged_dicts)
+        j = 0
+        for row in typed_csv_thing:
+            j += 1
+            print(row)
+            if j > 20:
+                break
 
     testme()
