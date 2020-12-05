@@ -27,6 +27,7 @@ import csv
 import datetime
 import json
 import re
+import pandas as pd
 import requests
 
 FieldTypes = Union[int, str, datetime.date]
@@ -156,6 +157,8 @@ class UrlCSV:
                 value = getattr(row, field)
                 if value != '':
                     value = func(getattr(row, field))
+                elif self.field_types[field][1] is int:
+                    value = 0
                 else:
                     value = None
                 typed_row.append(value)
@@ -244,6 +247,19 @@ def typed_dict_to_typed_csv(td: List[Dict[str, FieldTypes]]) -> List[List[FieldT
     return result
 
 
+def pivot_typed_dict(td: List[Dict[str, FieldTypes]]) -> Dict[str, List[FieldTypes]]:
+    """
+    Create a Pivot-typed-dict version of a TypedDict - this is for Pandas DataFrames
+    :param td:
+    :return:
+    """
+    result: Dict[str, List[FieldTypes]] = {key: [] for key in td[0].keys()}
+    for row in td:
+        for field in row.keys():
+            result[field].append(row[field])
+    return result
+
+
 if __name__ == '__main__':
     def testme():
         our_csv = UrlCSV("cdc", "https://data.cdc.gov/api/views/muzy-jte6/rows.csv")
@@ -269,5 +285,12 @@ if __name__ == '__main__':
             print(row)
             if j > 20:
                 break
+        pivot_dict = pivot_typed_dict(merged_dicts)
+        for key in pivot_dict.keys():
+            print(f"{key}: {pivot_dict[key][:10]}...")
+        data_frame = pd.DataFrame(pivot_dict)
+        print(data_frame[['MMWR_Year', 'MMWR_Week', 'All_Cause',
+                          'COVID_19_Multiple_Cause_of_Death',
+                          'COVID_19_Underlying_Cause_of_Death']].tail())
 
     testme()
