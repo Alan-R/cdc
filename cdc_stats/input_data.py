@@ -21,7 +21,7 @@
 """
 This code inputs data from a CSV URL into a few suitable Python formats
 """
-from typing import List, Dict, Tuple, Callable, Union
+from typing import List, Dict, Tuple, Callable, Union, Optional
 from collections import namedtuple
 import csv
 import datetime
@@ -71,7 +71,7 @@ class UrlCSV:
             self.data.append(self.csv_type(*row))
         self.field_names = fields
 
-        self.field_types: List[Tuple[Callable, type]] = self.determine_types()
+        self.field_types: Dict[str, Tuple[Callable, type]] = self.determine_types()
         self.typed_data = self._make_typed_tuples()
         self.typed_dict: List[Dict[str, FieldTypes]] = self._make_typed_dict()
 
@@ -176,6 +176,56 @@ class UrlCSV:
         return result
 
 
+def union_fields(*args: UrlCSV) -> List[str]:
+    """
+    Create an ordered list of fields that's the union of the fields in 'args'
+    The assumption is that they are generally somewhat similar, and that we want to
+    make sure we have the fields in about the same order, but all fields from
+    any of the UrlCSVs.
+
+    :return: List[str]
+    """
+    result: List[str] = []
+    next_field: Optional[str] = None
+    longest_field = 0
+    longest_fields: List[str] = []
+    for csv_arg in args:
+        if len(csv_arg.field_names) > longest_field:
+            longest_fields = [item for item in csv_arg.field_names]
+            longest_field = len(longest_fields)
+    for csv_arg in args:
+        if csv_arg.field_names == longest_fields:
+            continue
+        offset = 0
+        for index, field in enumerate(csv_arg.field_names):
+            if field not in longest_fields:
+                longest_fields.insert(index + offset, field)
+                offset += 1
+    return longest_fields
+
+
+def merge_typed_dicts(*args: UrlCSV) -> List[Dict[str, FieldTypes]]:
+    """
+    Merge lists of typed dictionaries from multiple UrlCSVs
+    This allows us to combine years with slightly different data
+    The set of fields in every row is the same.
+    Default values (None or 0) are provided for missing data
+
+    :param args:UrlCSV: list of typed dicts to combine
+    :return:merged (appended) typed dicts
+    """
+    csv_result: List[Dict[str, FieldTypes]] = []
+    field_list = union_fields(*args)
+    for csv_arg in args:
+        for row_dict in csv_arg.typed_dict:
+            new_row_dict: Dict[str, FieldTypes] = {}
+            for field in field_list:
+                default = None if 'flag' in field else 0
+                new_row_dict[field] = row_dict.get(field, default)
+            csv_result.append(new_row_dict)
+    return csv_result
+
+
 if __name__ == '__main__':
     def testme():
         our_csv = UrlCSV("cdc", "https://data.cdc.gov/api/views/muzy-jte6/rows.csv")
@@ -184,13 +234,13 @@ if __name__ == '__main__':
         csv2_fields = set(our_csv2.field_names)
         # print(csv.data)
         print(our_csv.field_types)
-        # for row in our_csv.typed_dict:
-        #     print(json.dumps(row, cls=FieldEncoder, indent=4))
         print(our_csv2.field_types)
-        print (csv_fields - csv2_fields)
-        print (csv2_fields - csv_fields)
-
-
-
+        print(csv_fields - csv2_fields)
+        print(csv2_fields - csv_fields)
+        merged_dicts = merge_typed_dicts(our_csv2, our_csv)
+        j = 0
+        for row in merged_dicts:
+            j += 1
+            print(json.dumps(row, cls=FieldEncoder, indent=4))
 
     testme()
