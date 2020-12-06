@@ -288,8 +288,24 @@ if __name__ == '__main__':
         for key in pivot_dict.keys():
             print(f"{key}: {pivot_dict[key][:10]}...")
         data_frame = pd.DataFrame(pivot_dict)
-        print(data_frame[['MMWR_Year', 'MMWR_Week', 'All_Cause',
-                          'COVID_19_Multiple_Cause_of_Death',
-                          'COVID_19_Underlying_Cause_of_Death']].tail())
+        some_deaths = data_frame[['Week_Ending_Date', 'All_Cause',
+                                  'COVID_19_Multiple_Cause_of_Death',
+                                  'COVID_19_Underlying_Cause_of_Death']]
+        print(some_deaths.tail())
+        death_keys: List[str] = []
+        for key in pivot_dict:
+            if key.startswith('MMWR') or key.startswith('Week') or key.startswith('flag_'):
+                continue
+            death_keys.append(key)
+        all_deaths = data_frame[death_keys]
+        print(all_deaths.head())
+        print(all_deaths.tail())
+        us_deaths = all_deaths[all_deaths['Jurisdiction_of_Occurrence'] == 'United States']
+        print(us_deaths.head())
+        print(us_deaths.tail())
+
+
+
+
 
     testme()
